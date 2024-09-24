@@ -3,4 +3,4 @@
 	url = git@github.com:kzj18/diff-surfel-rasterization.git
 [submodule "submodules/simple-knn"]
 	path = submodules/simple-knn
-	url = https://gitlab.inria.fr/bkerbl/simple-knn.git
+	url = git@gitee.com:kzj18/simple-knn.git
