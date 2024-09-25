@@ -10,17 +10,21 @@
 #
 
 import os
-import torch
+import sys
+import uuid
 from random import randint
+from argparse import ArgumentParser, Namespace
+from typing import List
+
+import torch
+from tqdm import tqdm
+
 from utils.loss_utils import l1_loss, ssim
 from gaussian_renderer import render, network_gui
-import sys
 from scene import Scene, GaussianModel
+from scene.cameras import Camera
 from utils.general_utils import safe_state
-import uuid
-from tqdm import tqdm
 from utils.image_utils import psnr, render_net_image
-from argparse import ArgumentParser, Namespace
 from arguments import ModelParams, PipelineParams, OptimizationParams
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -44,7 +48,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
     iter_start = torch.cuda.Event(enable_timing = True)
     iter_end = torch.cuda.Event(enable_timing = True)
 
-    viewpoint_stack = None
+    viewpoint_stack:List[Camera] = None
     ema_loss_for_log = 0.0
     ema_dist_for_log = 0.0
     ema_normal_for_log = 0.0
