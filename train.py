@@ -73,11 +73,11 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         
         render_pkg = render(viewpoint_cam, gaussians, pipe, background)
         image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
-        
         gt_image = viewpoint_cam.original_image.cuda()
-        Ll1 = l1_loss(image, gt_image)
         if viewpoint_cam_mask is not None:
-            Ll1[viewpoint_cam_mask] = 0.0
+            image[:, viewpoint_cam_mask] = gt_image[:, viewpoint_cam_mask]
+        
+        Ll1 = l1_loss(image, gt_image)
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
         
         # regularization

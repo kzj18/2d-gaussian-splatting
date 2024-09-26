@@ -51,11 +51,11 @@ def loadCam(args, id, cam_info:CameraInfo, resolution_scale):
         loaded_mask = None
         gt_image = resized_image_rgb
     
+    image_mask = None
     if cam_info.mask is not None:
-        image_mask = cam_info.mask.resize(resolution, Image.NEAREST)
-        image_mask = torch.from_numpy(np.array(image_mask)).unsqueeze(dim=-1).permute(2, 0, 1).bool()
-    else:
-        image_mask = None
+        if np.array(cam_info.mask).sum() > 0:
+            image_mask = cam_info.mask.resize(resolution, Image.NEAREST)
+            image_mask = torch.from_numpy(np.array(image_mask)).bool()
 
     return Camera(colmap_id=cam_info.uid, R=cam_info.R, T=cam_info.T, 
                   FoVx=cam_info.FovX, FoVy=cam_info.FovY, 

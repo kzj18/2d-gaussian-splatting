@@ -49,8 +49,8 @@ class Camera(nn.Module):
             
         self.image_mask = None
         if image_mask is not None:
-            if image_mask.sum() > 0:
-                self.image_mask = image_mask.to(self.data_device)
+            assert image_mask.sum() > 0, "image mask should have some non-zero values"
+            self.image_mask = image_mask.to(self.data_device)
         
         self.zfar = 100.0
         self.znear = 0.01

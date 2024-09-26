@@ -43,6 +43,8 @@ def process_subdir(
     os.makedirs(output_mask_dir, exist_ok=True)
     for i in range(6):
         input_mask_dir = os.path.join(input_subdir, 'videos', str(i), 'masks')
+        if not os.path.exists(input_mask_dir):
+            continue
         for mask_name in os.listdir(input_mask_dir):
             input_mask_path = os.path.join(input_mask_dir, mask_name)
             output_mask_path = os.path.join(output_mask_dir, mask_name)
