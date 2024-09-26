@@ -15,7 +15,7 @@ import numpy as np
 from utils.graphics_utils import getWorld2View2, getProjectionMatrix
 
 class Camera(nn.Module):
-    def __init__(self, colmap_id, R, T, FoVx, FoVy, image:torch.Tensor, gt_alpha_mask,
+    def __init__(self, colmap_id, R, T, FoVx, FoVy, image:torch.Tensor, image_mask:torch.Tensor, gt_alpha_mask,
                  image_name, uid,
                  trans=np.array([0.0, 0.0, 0.0]), scale=1.0, data_device = "cuda"
                  ):
@@ -46,6 +46,11 @@ class Camera(nn.Module):
         else:
             self.original_image *= torch.ones((1, self.image_height, self.image_width), device=self.data_device)
             self.gt_alpha_mask = None
+            
+        self.image_mask = None
+        if image_mask is not None:
+            if image_mask.sum() > 0:
+                self.image_mask = image_mask.to(self.data_device)
         
         self.zfar = 100.0
         self.znear = 0.01

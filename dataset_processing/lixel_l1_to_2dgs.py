@@ -38,6 +38,16 @@ def process_subdir(
         shutil.rmtree(output_rgb_dir)
     shutil.copytree(input_rgb_dir, output_rgb_dir)
     
+    # copy masks
+    output_mask_dir = os.path.join(output_subdir, 'masks')
+    os.makedirs(output_mask_dir, exist_ok=True)
+    for i in range(6):
+        input_mask_dir = os.path.join(input_subdir, 'videos', str(i), 'masks')
+        for mask_name in os.listdir(input_mask_dir):
+            input_mask_path = os.path.join(input_mask_dir, mask_name)
+            output_mask_path = os.path.join(output_mask_dir, mask_name)
+            shutil.copy(input_mask_path, output_mask_path)
+    
     # load l3i.json
     transform_json_path = os.path.join(input_subdir, 'lidar_map', 'l3i.json')
     with open(transform_json_path, 'r') as file:
@@ -65,8 +75,12 @@ def process_subdir(
     # write images.txt
     images_path = os.path.join(sparse0_dir, 'images.txt')
     with open(images_path, 'w') as file:
-        for i, image_data in enumerate(transform_json['images_data']):
-            image_name = image_data['name']
+        image_index = 0
+        for image_data in transform_json['images_data']:
+            image_name:str = image_data['name']
+            mask_path = os.path.join(output_mask_dir, image_name)
+            if not os.path.exists(mask_path):
+                continue
             qw = image_data['qw']
             qx = image_data['qx']
             qy = image_data['qy']
@@ -74,8 +88,9 @@ def process_subdir(
             tx = image_data['tx']
             ty = image_data['ty']
             tz = image_data['tz']
-            traj_line = str(i) + ' ' +str(qw) + ' ' +str(qx) + ' ' +str(qy) + ' ' +str(qz) + ' ' +str(tx) + ' ' +str(ty) + ' ' +str(tz) + ' ' + str(1) +' '+ image_name +'\n\n'
+            traj_line = str(image_index) + ' ' +str(qw) + ' ' +str(qx) + ' ' +str(qy) + ' ' +str(qz) + ' ' +str(tx) + ' ' +str(ty) + ' ' +str(tz) + ' ' + str(1) +' '+ image_name +'\n\n'
             file.write(traj_line)
+            image_index += 1
     print(f"traj data for {subdir_name} have been written to {images_path}")
     
     # write points3D.txt

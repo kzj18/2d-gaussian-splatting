@@ -15,10 +15,12 @@ from datetime import datetime
 import numpy as np
 import random
 
+from PIL.Image import Image
+
 def inverse_sigmoid(x):
     return torch.log(x/(1-x))
 
-def PILtoTorch(pil_image, resolution):
+def PILtoTorch(pil_image:Image, resolution):
     resized_image_PIL = pil_image.resize(resolution)
     resized_image = torch.from_numpy(np.array(resized_image_PIL)) / 255.0
     if len(resized_image.shape) == 3:
