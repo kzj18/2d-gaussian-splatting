@@ -100,9 +100,9 @@ def readColmapCameras(cam_extrinsics, cam_intrinsics, images_folder):
         image_name = os.path.basename(image_path).split(".")[0]
         image = Image.open(image_path)
         
-        masks_folder = os.path.join(masks_folder, os.path.basename(extr.name))
-        if os.path.exists(masks_folder):
-            mask = Image.open(masks_folder)
+        mask_path = os.path.join(masks_folder, os.path.basename(extr.name))
+        if os.path.exists(mask_path):
+            mask = Image.open(mask_path)
         else:
             mask = None
 

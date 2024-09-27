@@ -18,6 +18,8 @@ from typing import List
 
 import torch
 from tqdm import tqdm
+import cv2
+import numpy as np
 
 from utils.loss_utils import l1_loss, ssim
 from gaussian_renderer import render, network_gui
@@ -31,6 +33,16 @@ try:
     TENSORBOARD_FOUND = True
 except ImportError:
     TENSORBOARD_FOUND = False
+    
+def save_image_tensor(image_tensor:torch.Tensor, path:str):
+    if image_tensor.shape[0] == 1:
+        image_tensor_save = image_tensor[0]
+    elif image_tensor.shape[0] == 3:
+        image_tensor_save = image_tensor.permute(1, 2, 0)
+    else:
+        raise ValueError("Invalid image tensor shape")
+    image = cv2.cvtColor(np.uint8(image_tensor_save.detach().cpu().numpy() * 255), cv2.COLOR_RGB2BGR)
+    cv2.imwrite(path, image)
 
 def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoint_iterations, checkpoint):
     first_iter = 0
@@ -75,7 +87,13 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
         gt_image = viewpoint_cam.original_image.cuda()
         if viewpoint_cam_mask is not None:
+            # debug_dir = os.path.join(os.path.dirname(__file__), 'debug')
+            # os.makedirs(debug_dir, exist_ok=True)
+            # save_image_tensor(image, os.path.join(debug_dir, 'image.png'))
+            # save_image_tensor(gt_image, os.path.join(debug_dir, 'gt_image.png'))
             image[:, viewpoint_cam_mask] = gt_image[:, viewpoint_cam_mask]
+            # save_image_tensor(viewpoint_cam_mask[None].int(), os.path.join(debug_dir, 'mask.png'))
+            # save_image_tensor(image, os.path.join(debug_dir, 'image_masked.png'))
         
         Ll1 = l1_loss(image, gt_image)
         loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
